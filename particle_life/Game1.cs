@@ -62,12 +62,12 @@ namespace ParticleLifeSim
             _particleHandler.GenParticles(800);
 
             /*
-            var atractionMatrix = [
-                [10f, -10f, 0f, 0f, 0f],
-                [0f, 10f, -10f, 0f, 0f],
-                [0f, 0f, 10f, -10f, 0f],
-                [0f, 0f, 0f, 10f, -10f],
-                [-10f, 0f, 0f, 0f, 10f],
+            float[][] atractionMatrix = [
+                [10f, -10f, 10f, 0f, 0f],
+                [0f, 10f, -10f, 10f, 0f],
+                [0f, 0f, 10f, -10f, 10f],
+                [10f, 0f, 0f, 10f, -10f],
+                [-10f, 10f, 0f, 0f, 10f],
             ];
             _particleHandler.NewMatrix(atractionMatrix);
             */
