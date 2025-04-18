@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35913.81 d17.13
+VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "particle_life", "particle_life\particle_life.csproj", "{584E0878-A2A9-4464-BA85-8EE1F0FA1414}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParticleLifeSim", "particle_life\ParticleLifeSim.csproj", "{584E0878-A2A9-4464-BA85-8EE1F0FA1414}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
