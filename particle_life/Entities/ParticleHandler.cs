@@ -11,6 +11,7 @@ namespace ParticleLifeSim
         public List<Particle> Particles { get; } = [];
         public Dictionary<ColorIndex, Color> ColorMap = [];
         public Texture2D Texture;
+        public ParticleProperties ParticleProperties = new();
 
         private AtractionMatrix _atractionMatrix;
 
@@ -47,10 +48,12 @@ namespace ParticleLifeSim
         public void Update(GameTime gameTime)
         {
             Parallel.For(0, Particles.Count, i =>
-            {
-                Particles[i].UpdForces(Particles, _atractionMatrix.Get());
-                Particles[i].UpdMov(gameTime);
-            });
+                Particles[i].UpdForces(Particles, _atractionMatrix.Get(), ParticleProperties)
+            );
+
+            Parallel.For(0, Particles.Count, i =>
+                Particles[i].UpdMov(gameTime, ParticleProperties)
+            );
         }
         public void Draw(SpriteBatch spriteBatch)
         {

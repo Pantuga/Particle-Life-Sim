@@ -17,7 +17,7 @@ namespace ParticleLifeSim
 
     public class Game1 : Game
     {
-        public static readonly DiscreteStat<float> TimeScale = new([0.2f, 0.5f, 1f, 1.2f, 1.5f, 2f, 3f, 5f, 10f, 20f], 2);
+        public static readonly DiscreteStat<float> TimeScale = new([0.2f, 0.5f, 1f, 1.2f, 1.5f, 2f, 3f, 5f, 10f, 20f], 2, "x");
         public static readonly BoolStat IsPaused = new(false);
 
         public static readonly Vector2 SCREEN_SIZE = new(900, 600);
@@ -51,6 +51,10 @@ namespace ParticleLifeSim
             _inputHandler.AddKeyAction(Keys.Q, () => TimeScale.StepForward());
             _inputHandler.AddKeyAction(Keys.A, () => TimeScale.StepBackward());
             _inputHandler.AddKeyAction(Keys.Z, () => TimeScale.ToStep(2));
+
+            _inputHandler.AddKeyAction(Keys.W, () => TimeScale.StepForward());
+            _inputHandler.AddKeyAction(Keys.S, () => TimeScale.StepBackward());
+            _inputHandler.AddKeyAction(Keys.X, () => TimeScale.ToStep(2));
 
             _inputHandler.AddKeyAction(Keys.Space, () => IsPaused.Toggle());
         }
@@ -89,8 +93,6 @@ namespace ParticleLifeSim
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            var kstate = Keyboard.GetState();
 
             _inputHandler.Update();
 
