@@ -16,14 +16,20 @@ namespace ParticleLifeSim
             Unit = unit;
         }
 
-        public void DrawStat(SpriteBatch spriteBatch, SpriteFont font, Vector2 pos, string name, string[] notes)
+        public void DrawStat(SpriteBatch spriteBatch, SpriteFont font, Vector2 pos, string name, string[] notes, string warning = "")
         {
-            spriteBatch.DrawString(font, name + ": " + Value + Unit, pos, Color.White);
+            if (warning == "")
+                spriteBatch.DrawString(font, name + ": " + Value +" "+ Unit, pos, Color.White);
+            else
+                spriteBatch.DrawString(font, name + ": " + Value + " " + Unit, pos, Color.Yellow);
 
             for (int i = 0; i < notes.Length; i++)
             {
                 spriteBatch.DrawString(font, notes[i], pos + new Vector2(0, (i + 1) * 20), Color.Gray);
             }
+
+            if (warning != "")
+                spriteBatch.DrawString(font,$"Warning: " + warning, pos + new Vector2(0, (notes.Length + 1) * 20), Color.Yellow);
         }
 
         public virtual void Set(ValType value)

@@ -6,22 +6,27 @@ using static ParticleLifeSim.Game1;
 
 namespace ParticleLifeSim
 {
-    public struct ParticleProperties(float minDist = 6f, float maxDist = 100f, short maxVel = 500, float friction = 0.01f)
+    public struct ParticleProperties ()
     {
-        public readonly float MinDistance = minDist;
-        public readonly float MaxDistance = maxDist;
-        public readonly short MaxVelocity = maxVel;
-        public readonly float Friction = friction;
+        public float MinDistance = 6f;
+        public float MaxDistance = 100f;
+        public float MaxVelocity = 500f;
+        public float Friction = 0.01f;
     }
 
     public class Particle(Vector2 pos, Vector2 vel, ColorIndex color)
     {
+        public const float MIN_DISTANCE = 6f;
+        public const float MAX_DISTANCE = 100f;
+        public const float MAX_VELOCITY = 500f;
+        public static float Friction = 0.01f;
+
         public Vector2 Position = pos;
         public Vector2 Velocity = vel;
-        public Vector2 Acceleration = new(0, 0);
+        public Vector2 Acceleration = Vector2.Zero;
         public ColorIndex Color = color;
 
-        float CalculateForce(float distance, float force, ParticleProperties pProps)
+        static float CalculateForce(float distance, float force, ParticleProperties pProps)
         {
             float MAX_RELEVANT_DISTANCE = pProps.MaxDistance * Math.Abs(force) * 0.1f; // because force value is in [-10, 10]
             float MID_DISTANCE = (pProps.MinDistance + MAX_RELEVANT_DISTANCE) / 2f;
@@ -38,62 +43,64 @@ namespace ParticleLifeSim
 
         public void UpdForces(List<Particle> particles, float[][] atractionMatrix, ParticleProperties pProps)
         {
-            Vector2 finalForce = new(0, 0);
+            Vector2 finalForce = Vector2.Zero;
             foreach (var p in particles)
             {
-                if (p.Position == Position) continue; // avoid division by 0
+                if (p.Position == Position) continue; // check if 'p == this' and avoid division by 0 if not
 
                 Vector2 positionDiference = p.Position - Position;
 
                 float distance = positionDiference.Length();
                 if (distance > pProps.MaxDistance) continue;  // Skip faraway particles
 
-                Vector2 direction = positionDiference / distance;
+                Vector2 direction = positionDiference / distance; // Faster than Normalize()
 
                 float forceFactor = atractionMatrix[(int)Color][(int)p.Color];
                 float force = CalculateForce(distance, forceFactor, pProps);
 
-                finalForce += direction * force;
+                finalForce += force * direction;
             }
             Acceleration = finalForce;
         }
 
-        public void UpdMov(GameTime gametime, ParticleProperties pProps)
+        public void UpdMov(GameTime gametime)
         {
             float deltaTime = (float)gametime.ElapsedGameTime.TotalSeconds * TimeScale.Value;
 
             Velocity += Acceleration * deltaTime;
-            Velocity *= 1f - pProps.Friction;
+            Velocity *= 1f - Friction;
 
-            if (Velocity.Y > pProps.MaxVelocity) Velocity.Y = pProps.MaxVelocity;
-            if (Velocity.X > pProps.MaxVelocity) Velocity.X = pProps.MaxVelocity;
+            if (Velocity.Y > MAX_VELOCITY) Velocity.Y = MAX_VELOCITY;
+            if (Velocity.X > MAX_VELOCITY) Velocity.X = MAX_VELOCITY;
 
             Position += Velocity * deltaTime;
 
-            if (Position.X > SCREEN_SIZE.X + SCREEN_OFFSET_LEFT.X)
+            if (Position.X > SCREEN_SIZE.X + SCREEN_OFFSET_LEFT_UP.X)
             {
-                Position.X = (short)(SCREEN_SIZE.X + SCREEN_OFFSET_LEFT.X);
-                Velocity.X *= -1;
+                Position.X = SCREEN_SIZE.X + SCREEN_OFFSET_LEFT_UP.X;
+                Velocity.X *= -1f;
             }
-            if (Position.Y > SCREEN_SIZE.Y + SCREEN_OFFSET_LEFT.Y)
+            if (Position.Y > SCREEN_SIZE.Y + SCREEN_OFFSET_LEFT_UP.Y)
             {
-                Position.Y = (short)(SCREEN_SIZE.Y + SCREEN_OFFSET_LEFT.Y);
-                Velocity.Y *= -1;
+                Position.Y = SCREEN_SIZE.Y + SCREEN_OFFSET_LEFT_UP.Y;
+                Velocity.Y *= -1f;
             }
-            if (Position.X < SCREEN_OFFSET_LEFT.X)
+            if (Position.X < SCREEN_OFFSET_LEFT_UP.X)
             {
-                Position.X = (short)SCREEN_OFFSET_LEFT.X;
-                Velocity.X *= -1;
+                Position.X = SCREEN_OFFSET_LEFT_UP.X;
+                Velocity.X *= -1f;
             }
-            if (Position.Y < SCREEN_OFFSET_LEFT.Y)
+            if (Position.Y < SCREEN_OFFSET_LEFT_UP.Y)
             {
-                Position.Y = (short)SCREEN_OFFSET_LEFT.Y;
-                Velocity.Y *= -1;
+                Position.Y = SCREEN_OFFSET_LEFT_UP.Y;
+                Velocity.Y *= -1f;
             }
         }
 
         public void Draw(SpriteBatch spriteBatch, Texture2D texture, Color color)
         {
+            if (texture == null) return;
+
             spriteBatch.Draw(
                 texture,
                 Position,

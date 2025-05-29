@@ -37,10 +37,11 @@ namespace ParticleLifeSim
             for (int i = 0; i < count; i++)
             {
                 Vector2 randomPos = new(
-                    rnd.Next((int)SCREEN_OFFSET_LEFT.X, (int)(SCREEN_SIZE.X + SCREEN_OFFSET_LEFT.X)),
-                    rnd.Next((int)SCREEN_OFFSET_LEFT.Y, (int)(SCREEN_SIZE.Y + SCREEN_OFFSET_LEFT.Y))
+                    rnd.Next((int)SCREEN_OFFSET_LEFT_UP.X, (int)(SCREEN_SIZE.X + SCREEN_OFFSET_LEFT_UP.X)),
+                    rnd.Next((int)SCREEN_OFFSET_LEFT_UP.Y, (int)(SCREEN_SIZE.Y + SCREEN_OFFSET_LEFT_UP.Y))
                 );
-                Vector2 randomVel = new(0); //new(rnd.Next(-500, 500), rnd.Next(-500, 500)
+                //Vector2 randomPos = new(i + SCREEN_OFFSET_LEFT_UP.X, i + SCREEN_OFFSET_LEFT_UP.Y);
+                Vector2 randomVel = new(0); /*new(rnd.Next(-500, 500), rnd.Next(-500, 500));*/
                 ColorIndex randomColor = (ColorIndex)rnd.Next(0, 5);
                 Particles.Add(new Particle(randomPos, randomVel, randomColor));
             }
@@ -52,7 +53,7 @@ namespace ParticleLifeSim
             );
 
             Parallel.For(0, Particles.Count, i =>
-                Particles[i].UpdMov(gameTime, ParticleProperties)
+                Particles[i].UpdMov(gameTime) 
             );
         }
         public void Draw(SpriteBatch spriteBatch)

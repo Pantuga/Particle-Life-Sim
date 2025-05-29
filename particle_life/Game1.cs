@@ -19,10 +19,11 @@ namespace ParticleLifeSim
     {
         public static readonly DiscreteStat<float> TimeScale = new([0.2f, 0.5f, 1f, 1.2f, 1.5f, 2f, 3f, 5f, 10f, 20f], 2, "x");
         public static readonly BoolStat IsPaused = new(false);
+        public static readonly ContinuousStat ParticleCount = new(800, 50, "particles");
 
         public static readonly Vector2 SCREEN_SIZE = new(900, 600);
-        public static readonly Vector2 SCREEN_OFFSET_LEFT = new(300, 0);
-        public static readonly Vector2 SCREEN_OFFSET_RIGHT = new();
+        public static readonly Vector2 SCREEN_OFFSET_LEFT_UP = new(300, 0);
+        public static readonly Vector2 SCREEN_OFFSET_RIGHT_DOWN = new();
 
         private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
@@ -32,6 +33,8 @@ namespace ParticleLifeSim
         public static readonly Random rnd = new();
 
         private InputHandler _inputHandler = new();
+
+        private Texture2D _particleTexture;
         private ParticleHandler _particleHandler = new();
 
         private Texture2D _buttonTexture;
@@ -39,11 +42,23 @@ namespace ParticleLifeSim
         {
             _graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferWidth = (int)(SCREEN_OFFSET_LEFT.X + SCREEN_SIZE.X + SCREEN_OFFSET_RIGHT.X),
-                PreferredBackBufferHeight = (int)(SCREEN_OFFSET_LEFT.Y + SCREEN_SIZE.Y + SCREEN_OFFSET_RIGHT.Y)
+                PreferredBackBufferWidth = (int)(SCREEN_OFFSET_LEFT_UP.X + SCREEN_SIZE.X + SCREEN_OFFSET_RIGHT_DOWN.X),
+                PreferredBackBufferHeight = (int)(SCREEN_OFFSET_LEFT_UP.Y + SCREEN_SIZE.Y + SCREEN_OFFSET_RIGHT_DOWN.Y),
             };
+            this.Window.AllowUserResizing = true;
+
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+        }
+
+        private void InitParticles() 
+        {
+            _particleHandler = new()
+            {
+                Texture = _particleTexture,
+            };
+            _particleHandler.NewMatrix();
+            _particleHandler.GenParticles((int)ParticleCount.Value);
         }
 
         private void SetupControls()
@@ -56,14 +71,18 @@ namespace ParticleLifeSim
             _inputHandler.AddKeyAction(Keys.S, () => TimeScale.StepBackward());
             _inputHandler.AddKeyAction(Keys.X, () => TimeScale.ToStep(2));
 
+            _inputHandler.AddKeyAction(Keys.Up, () => ParticleCount.Increment());
+            _inputHandler.AddKeyAction(Keys.Down, () => ParticleCount.Decrement());
+
             _inputHandler.AddKeyAction(Keys.Space, () => IsPaused.Toggle());
+
+            _inputHandler.AddKeyAction(Keys.R, () => InitParticles());
+
         }
 
         protected override void Initialize()
         {
             SetupControls();
-
-            _particleHandler.GenParticles(800);
 
             /*
             float[][] atractionMatrix = [
@@ -75,7 +94,6 @@ namespace ParticleLifeSim
             ];
             _particleHandler.NewMatrix(atractionMatrix);
             */
-            _particleHandler.NewMatrix();
 
             base.Initialize();
         }
@@ -85,7 +103,7 @@ namespace ParticleLifeSim
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _fontArial = Content.Load<SpriteFont>("Arial");
             // _fontCourierNew = Content.Load<SpriteFont>("CourierNew");
-            _particleHandler.Texture = Content.Load<Texture2D>("particle");
+            _particleTexture = Content.Load<Texture2D>("particle");
             _buttonTexture = Content.Load<Texture2D>("button");
         }
 
@@ -108,13 +126,48 @@ namespace ParticleLifeSim
 
             _spriteBatch.Begin();
 
-            _particleHandler.Draw(_spriteBatch);
+            if (_particleHandler.Texture != null)
+            {
+                _particleHandler.Draw(_spriteBatch);
+                _particleHandler.DrawMatrix(_spriteBatch, new Vector2(10, 10), _fontArial);
+            }
+            else
+            {
+                _spriteBatch.DrawString
+                    (
+                        _fontArial,
+                        "Press R to start",
+                        new Vector2(10),
+                        new Color(255, 255, 255)
+                    );
+            }
 
-            _particleHandler.DrawMatrix(_spriteBatch, new Vector2(10, 10), _fontArial);
+            string particleCountWarning = 
+                (ParticleCount.Value > 2000)? "May impact performance" : "";
 
-            TimeScale.DrawStat(_spriteBatch, _fontArial, new Vector2(10, 300), "Time Scale", ["Q: increase", "A: decrease", "Z: reset"]);
+            ParticleCount.DrawStat(
+                    _spriteBatch, _fontArial,
+                    new Vector2(10, 200),
+                    "Particle Count",
+                    ["Up: Increase", "Down: Decrease", "R: Reset the Sim."],
+                    particleCountWarning
+                );
 
-            IsPaused.DrawStat(_spriteBatch, _fontArial, new Vector2(10, 400), "Paused", ["Space: toggle"]);
+            TimeScale.DrawStat(
+                    _spriteBatch,
+                    _fontArial,
+                    new Vector2(10, 300),
+                    "Time Scale",
+                    ["Q: Increase", "A: Decrease", "Z: Reset"]
+                );
+
+            IsPaused.DrawStat(
+                    _spriteBatch,
+                    _fontArial,
+                    new Vector2(10, 400),
+                    "Paused",
+                    ["Space: toggle"]
+                );
 
             _spriteBatch.End();
 
